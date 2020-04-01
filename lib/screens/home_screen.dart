@@ -128,7 +128,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   _fetchContent(String url) async{
     try{
-      final result = await http.get('https://www.instagram.com/p/B8liuDXhkiaWX57HpetF6K-0uqS-qAZXET0LfA0/');
+      //final result = await http.get('https://www.instagram.com/p/B8liuDXhkiaWX57HpetF6K-0uqS-qAZXET0LfA0/');
+      final result = await http.get('$url');
       final body = result.body.split('\n');
       final str = 'window.__additionalDataLoaded(\'/p/B-OrEXBh5Lr/\',';
       for(int i = 0; i < body.length; i++){
@@ -337,21 +338,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 //  }
 
   Widget _buildImagePreview({String userId, String url, WidgetType type}){
-//    return Image.network(
-//      type == WidgetType.TYPE_SINGLE ? 'https://instagram.com/p/$userId/media/?size=l' : '$url', width: 300, height: 300,
-//      frameBuilder: (context, child, frame, wasSynchronouslyLoaded){
-//        return Center(child: frame == null ?
-//        const CircularProgressIndicator(valueColor: const AlwaysStoppedAnimation(Colors.lightBlue)) : Column(
-//          children: <Widget>[
-//            child,
-//            OutlineButton(
-//              onPressed: () => type == WidgetType.TYPE_SINGLE ? _onOutlinePressed(userId: '$userId') : _onOutlinePressed(url: '$url'),
-//              child: const Text('Save'),
-//            ),
-//          ],
-//        ));
-//      },
-//    );
     _image = Image.network(
       type == WidgetType.TYPE_SINGLE ? 'https://instagram.com/p/$userId/media/?size=l' : '$url', width: 300, height: 300,
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded){

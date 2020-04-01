@@ -28,7 +28,7 @@ dependencies:
   flutter_offline: "^0.3.0"
   shared_preferences: ^0.5.4+8
   image_gallery_saver: ^1.2.2
-  permission_handler: ^3.0.0
+  permission_handler: ^2.2.0
   webview_flutter: ^0.3.15
 
 dev_dependencies:
