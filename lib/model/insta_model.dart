@@ -67,12 +67,14 @@ class Graphql{
 class ShortCodeMedia{
   final String display_url;
   final EdgeSidecarToChildren sidecarToChildren;
-  ShortCodeMedia({this.display_url, this.sidecarToChildren});
+  final Owner owner;
+  ShortCodeMedia({this.display_url, this.sidecarToChildren, this.owner});
 
   factory ShortCodeMedia.fromJson(Map<String, dynamic> json){
     return ShortCodeMedia(
       display_url: json['display_url'],
-      sidecarToChildren: EdgeSidecarToChildren.fromJson(json['edge_sidecar_to_children'])
+      sidecarToChildren: EdgeSidecarToChildren.fromJson(json['edge_sidecar_to_children']),
+      owner: Owner.fromJson(json['owner'])
     );
   }
 }

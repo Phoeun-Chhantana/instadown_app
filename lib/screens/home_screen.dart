@@ -139,36 +139,34 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             try{
               final model = InstaModel.fromJson(json.decode(body.elementAt(i).substring(52, lastIndex - 1)));
               final edges = model.entryData.postPages.elementAt(0).graphql.shortCodeMedia.sidecarToChildren.edges;
-              if(edges.isNotEmpty){
+              final isPrivate = model.entryData.postPages.elementAt(0).graphql.shortCodeMedia.owner.is_private;
+              if(edges.isNotEmpty && !isPrivate){
                 _fetchMultiImage(edges);
                 break;
               }
             }catch(e){
-              final index = _editingController.text.indexOf('p/');
-              final lastIndex = _editingController.text.lastIndexOf('/?');
-              final userId = _editingController.text.substring(index + 2, lastIndex);
-              _fetchImageSingle('$userId');
+              body.forEach((v){
+                if(v.contains('"is_private":true')){
+                  _progressBloc.actionSink.add(ActionButtonProgress.GETTING);
+                  print(v);
+                }
+                else if(v.contains('"is_private":false')){
+                  final index = _editingController.text.indexOf('p/');
+                  final lastIndex = _editingController.text.lastIndexOf('/?');
+                  final userId = _editingController.text.substring(index + 2, lastIndex);
+                  _fetchImageSingle('$userId');
+                }
+              });
             }
           }
         }
       }
+      else{
+        _progressBloc.actionSink.add(ActionButtonProgress.GETTING);
+        print('account is private');
+      }
     }on SocketException catch(e){
       _progressBloc.actionSink.add(ActionButtonProgress.GETTING);
-      showCupertinoDialog(
-        context: context,
-        builder: (context){
-          return CupertinoAlertDialog(
-            title: const Text('Message'),
-            content: const Text('No internet connection'),
-            actions: <Widget>[
-              CupertinoDialogAction(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('Close'),
-              )
-            ],
-          );
-        }
-      );
     } on HttpException catch(e){
       _progressBloc.actionSink.add(ActionButtonProgress.GETTING);
       print(e.message);
@@ -186,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   _fetchMultiImage(List<Edges> edges){
     edges.forEach((url){
-      //Provider.of<WidgetNotifier>(context).add(_buildMultiImage(v.node.resources.elementAt(2).src));
       Provider.of<WidgetNotifier>(context).add(_buildImagePreview(url: '${url.node.resources.elementAt(2).src}', type: WidgetType.TYPE_MULTI));
     });
     _progressBloc.actionSink.add(ActionButtonProgress.GETTING);
@@ -336,11 +333,31 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 //  }
 
   Widget _buildImagePreview({String userId, String url, WidgetType type}){
-    _image = Image.network(
-      type == WidgetType.TYPE_SINGLE ? 'https://instagram.com/p/$userId/media/?size=l' : '$url', width: 300, height: 300,
-      frameBuilder: (context, child, frame, wasSynchronouslyLoaded){
+//    _image = Image.network(
+//      type == WidgetType.TYPE_SINGLE ? 'https://instagram.com/p/$userId/media/?size=l' : '$url', width: 300, height: 300,
+//      frameBuilder: (context, child, frame, wasSynchronouslyLoaded){
+//        return Center(child: frame == null ?
+//        const CircularProgressIndicator(valueColor: const AlwaysStoppedAnimation(Colors.lightBlue)) : Column(
+//          children: <Widget>[
+//            child,
+//            OutlineButton(
+//              onPressed: () => _onOutlinePressed(type),
+//              child: const Text('Save'),
+//            ),
+//          ],
+//        ));
+//      },
+//    );
+//    return _image;
+    _image = Image(
+      image: NetworkImage(
+        type == WidgetType.TYPE_SINGLE ? 'https://instagram.com/p/$userId/media/?size=l' : '$url'
+      ),
+      width: 300, height: 300,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
         return Center(child: frame == null ?
-        const CircularProgressIndicator(valueColor: const AlwaysStoppedAnimation(Colors.lightBlue)) : Column(
+        const CircularProgressIndicator(valueColor: const AlwaysStoppedAnimation(Colors.lightBlue))
+            : Column(
           children: <Widget>[
             child,
             OutlineButton(
@@ -349,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
           ],
         ));
-      },
+      }
     );
     return _image;
   }
