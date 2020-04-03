@@ -130,29 +130,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     try{
       //final result = await http.get('https://www.instagram.com/p/B8liuDXhkiaWX57HpetF6K-0uqS-qAZXET0LfA0/');
       final result = await http.get('$url');
-      final body = result.body.split('\n');
-      final str = 'window.__additionalDataLoaded(\'/p/B-OrEXBh5Lr/\',';
-      for(int i = 0; i < body.length; i++){
-        if(body.elementAt(i).contains('config')){
-          final int lastIndex = body.elementAt(i).lastIndexOf('</script>'.toString());
-          try{
-            final model = InstaModel.fromJson(json.decode(body.elementAt(i).substring(52, lastIndex - 1)));
-            final edges = model.entryData.postPages.elementAt(0).graphql.shortCodeMedia.sidecarToChildren.edges;
-            if(edges.isNotEmpty){
-              _fetchMultiImage(edges);
-              break;
+      if(result.statusCode == 200){
+        final body = result.body.split('\n');
+        //final str = 'window.__additionalDataLoaded(\'/p/B-OrEXBh5Lr/\',';
+        for(int i = 0; i < body.length; i++){
+          if(body.elementAt(i).contains('config')){
+            final int lastIndex = body.elementAt(i).lastIndexOf('</script>'.toString());
+            try{
+              final model = InstaModel.fromJson(json.decode(body.elementAt(i).substring(52, lastIndex - 1)));
+              final edges = model.entryData.postPages.elementAt(0).graphql.shortCodeMedia.sidecarToChildren.edges;
+              if(edges.isNotEmpty){
+                _fetchMultiImage(edges);
+                break;
+              }
+            }catch(e){
+              final index = _editingController.text.indexOf('p/');
+              final lastIndex = _editingController.text.lastIndexOf('/?');
+              final userId = _editingController.text.substring(index + 2, lastIndex);
+              _fetchImageSingle('$userId');
             }
-          }catch(e){
-            final index = _editingController.text.indexOf('p/');
-            final lastIndex = _editingController.text.lastIndexOf('/?');
-            final userId = _editingController.text.substring(index + 2, lastIndex);
-            _fetchImageSingle('$userId');
           }
         }
-//        else{
-//          _progressBloc.actionSink.add(ActionButtonProgress.GETTING);
-//          break;
-//        }
       }
     }on SocketException catch(e){
       _progressBloc.actionSink.add(ActionButtonProgress.GETTING);
@@ -227,65 +225,65 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     else return null;
   }
 
-  _saveToLocalDevice(Uint8List imageBytes) async{
-    await ImageGallerySaver.saveImage(imageBytes);
-    print(imageBytes);
-    //Image(image: AssetImage(''));
-  }
-
-  Future<http.Response> _loadFromUrl({String userId, String url}) async{
-//    final result = await _requestPermission();
-//    if(Platform.isIOS){
-//      if(Provider.of<WidgetNotifier>(context).getWidgetType == WidgetType.TYPE_SINGLE){
-//        if(result[PermissionGroup.storage] == PermissionStatus.granted){
-//          final response = await http.get('https://instagram.com/p/$userId/media/?size=l');
-//          _saveToLocalDevice(response.bodyBytes);
-//          print('user granted');
-//          return response;
-//        }else print('user denied');
-//      }
-//      else{
-//        if(result[PermissionGroup.storage] == PermissionStatus.granted){
-//          final response = await http.get('$url');
-//          _saveToLocalDevice(response.bodyBytes);
-//          print('user granted');
-//        }else print('user denied');
-//      }
-//    }
-//    else if(Platform.isAndroid){
-//      if(Provider.of<WidgetNotifier>(context).getWidgetType == WidgetType.TYPE_SINGLE){
-//        if(result[PermissionGroup.storage] == PermissionStatus.granted){
-//          final response = await http.get('https://instagram.com/p/$userId/media/?size=l');
+//  _saveToLocalDevice(Uint8List imageBytes) async{
+//    await ImageGallerySaver.saveImage(imageBytes);
+//    print(imageBytes);
+//    //Image(image: AssetImage(''));
+//  }
+//
+//  Future<http.Response> _loadFromUrl({String userId, String url}) async{
+////    final result = await _requestPermission();
+////    if(Platform.isIOS){
+////      if(Provider.of<WidgetNotifier>(context).getWidgetType == WidgetType.TYPE_SINGLE){
+////        if(result[PermissionGroup.storage] == PermissionStatus.granted){
+////          final response = await http.get('https://instagram.com/p/$userId/media/?size=l');
 ////          _saveToLocalDevice(response.bodyBytes);
-//          print('user granted');
-//        }else print('user denied');
+////          print('user granted');
+////          return response;
+////        }else print('user denied');
+////      }
+////      else{
+////        if(result[PermissionGroup.storage] == PermissionStatus.granted){
+////          final response = await http.get('$url');
+////          _saveToLocalDevice(response.bodyBytes);
+////          print('user granted');
+////        }else print('user denied');
+////      }
+////    }
+////    else if(Platform.isAndroid){
+////      if(Provider.of<WidgetNotifier>(context).getWidgetType == WidgetType.TYPE_SINGLE){
+////        if(result[PermissionGroup.storage] == PermissionStatus.granted){
+////          final response = await http.get('https://instagram.com/p/$userId/media/?size=l');
+//////          _saveToLocalDevice(response.bodyBytes);
+////          print('user granted');
+////        }else print('user denied');
+////      }
+////      else{
+////        if(result[PermissionGroup.storage] == PermissionStatus.granted){
+////          final response = await http.get('$url');
+////          if(response.statusCode == 200){
+////            _saveToLocalDevice(response.bodyBytes);
+////            return response;
+////          }
+////          print('user granted');
+////        }else print('user denied');
+////      }
+////    }
+//    if(Provider.of<WidgetNotifier>(context).getWidgetType == WidgetType.TYPE_MULTI){
+//      final response = await http.get('$url');
+//      if(response.statusCode == 200){
+//        _saveToLocalDevice(response.bodyBytes);
+//        return response;
 //      }
-//      else{
-//        if(result[PermissionGroup.storage] == PermissionStatus.granted){
-//          final response = await http.get('$url');
-//          if(response.statusCode == 200){
-//            _saveToLocalDevice(response.bodyBytes);
-//            return response;
-//          }
-//          print('user granted');
-//        }else print('user denied');
+//    }else{
+//      final response = await http.get('https://instagram.com/p/$userId/media/?size=l');
+//      if(response.statusCode == 200){
+//        _saveToLocalDevice(response.bodyBytes);
+//        return response;
 //      }
 //    }
-    if(Provider.of<WidgetNotifier>(context).getWidgetType == WidgetType.TYPE_MULTI){
-      final response = await http.get('$url');
-      if(response.statusCode == 200){
-        _saveToLocalDevice(response.bodyBytes);
-        return response;
-      }
-    }else{
-      final response = await http.get('https://instagram.com/p/$userId/media/?size=l');
-      if(response.statusCode == 200){
-        _saveToLocalDevice(response.bodyBytes);
-        return response;
-      }
-    }
-    return null;
-  }
+//    return null;
+//  }
 
 //  Widget _buildImageSingle(String userId){
 //    return Column(
