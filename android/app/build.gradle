@@ -32,6 +32,8 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    ndkVersion "17.0.4754217"
+
     lintOptions {
         disable 'InvalidPackage'
     }

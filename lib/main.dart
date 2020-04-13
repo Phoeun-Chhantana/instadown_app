@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'provider/widget_notifier.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
+import 'provider/page_indicator_provider.dart';
 
 
 //void main() => runApp(
@@ -15,8 +16,17 @@ import 'package:flutter/cupertino.dart';
 
 void main(){
   runApp(
-    ChangeNotifierProvider(
-      builder: (context) => WidgetNotifier(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => WidgetNotifier(),
+          //builder: (context) => WidgetNotifier(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => PageIndicatorProvider(),
+          //builder: (context) => PageIndicatorProvider(),
+        )
+      ],
       child: MyApp(),
     )
   );

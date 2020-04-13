@@ -5,15 +5,14 @@ import 'dart:convert';
 import 'package:instadown_app/model/insta_model.dart';
 import 'package:provider/provider.dart';
 import 'package:instadown_app/provider/widget_notifier.dart';
-import 'package:flutter_offline/flutter_offline.dart';
+import 'package:instadown_app/provider/page_indicator_provider.dart';
 import 'package:instadown_app/common_widget/button_progress.dart';
 import 'package:instadown_app/bloc/button_progress_bloc.dart';
 import 'dart:io';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'dart:typed_data';
-import 'package:permission_handler/permission_handler.dart';
 import 'dart:ui';
+import 'package:simple_permissions/simple_permissions.dart';
 
 class HomeScreen extends StatefulWidget{
   _HomeScreenState createState() => _HomeScreenState();
@@ -29,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final String _regExPatternForUrl = r'^[{h}]{1}[{t}]{2}[{p}][{s}][{:}][{/}]{2}[w]{3}[.][{i,n,s,t,a,g,r,a,m,.,c,o,m,/,p,/}]{16}\D+';
 
   Image _image;
-  ValueNotifier<int> _selectedIndexOnPageView;
+  //ValueNotifier<int> _selectedIndexOnPageView;
   
   @override
   void initState() {
@@ -40,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     _progressBloc = ButtonProgressBloc();
 
-    _selectedIndexOnPageView = new ValueNotifier(0);
+    //_selectedIndexOnPageView = new ValueNotifier(0);
 
     super.initState();
   }
@@ -61,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _editingController.dispose();
     _animationController.dispose();
     _progressBloc.dispose();
-    _selectedIndexOnPageView.dispose();
+   // _selectedIndexOnPageView.dispose();
     super.dispose();
   }
 
@@ -203,20 +202,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 //    );
 //  }
 
-//  Future<PermissionStatus> _checkPermissionHandler() async{
-//    final result = await PermissionHandler().checkPermissionStatus(PermissionGroup.storage);
-//    return result;
-//  }
-
-  Future<Map<PermissionGroup, PermissionStatus>> _requestPermission() async{
+  Future<PermissionStatus> _requestPermission() async{
     if(Platform.isIOS){
-      final result = await PermissionHandler().requestPermissions(
-          [PermissionGroup.photos]);
+      final result = await SimplePermissions.requestPermission(Permission.PhotoLibrary);
       return result;
     }
     else if(Platform.isAndroid){
-      final result = await PermissionHandler().requestPermissions(
-          [PermissionGroup.storage]);
+      final result = await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
       return result;
     }
     else return null;
@@ -381,8 +373,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             future: info.image.toByteData(format: ImageByteFormat.png),
             builder: (context, snapshot){
               if(snapshot.hasData) {
-                ImageGallerySaver.saveImage(
-                    snapshot.data.buffer.asUint8List(snapshot.data.offsetInBytes, snapshot.data.lengthInBytes));
+                ImageGallerySaver.saveImage(snapshot.data.buffer.asUint8List(snapshot.data.offsetInBytes, snapshot.data.lengthInBytes));
+                Navigator.of(context).pop(); // automatically finish dialog when saved
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -392,14 +384,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ],
                 );
               }
-              else return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text('Saving'),
-                  const SizedBox(width: 20),
-                  const CupertinoActivityIndicator()
-                ],
-              );
+              else {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Text('Saving'),
+                    const SizedBox(width: 20),
+                    const CupertinoActivityIndicator()
+                  ],
+                );
+              }
             },
           ),
         );
@@ -409,12 +403,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   _onOutlinePressed(WidgetType type) async{
     final result = await _requestPermission();
+    final selectedIndex = Provider.of<PageIndicatorProvider>(context).selectedIndex;
     if(Platform.isAndroid){
       //if(result[PermissionGroup.storage] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
-      if(result[PermissionGroup.storage] == PermissionStatus.granted){
+      if(result == PermissionStatus.authorized){
         if(WidgetType.TYPE_MULTI == type){
           final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
-          (imageWidgets.elementAt(_selectedIndexOnPageView.value) as Image).image.resolve(ImageConfiguration.empty)
+          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
               .completer.addListener(ImageStreamListener(_onImageSaver));
         }
         else _image.image.resolve(ImageConfiguration.empty)
@@ -423,10 +418,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     }
     else if(Platform.isIOS){
       //if(result[PermissionGroup.photos] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
-      if(result[PermissionGroup.storage] == PermissionStatus.granted){
+      if(result == PermissionStatus.authorized){
         if(WidgetType.TYPE_MULTI == type){
           final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
-          (imageWidgets.elementAt(_selectedIndexOnPageView.value) as Image).image.resolve(ImageConfiguration.empty)
+          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
               .completer.addListener(ImageStreamListener(_onImageSaver));
         }
         else _image.image.resolve(ImageConfiguration.empty)
@@ -458,14 +453,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
             Expanded(
               flex: 3,
-              child: PageView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                onPageChanged: (index){
-                  _selectedIndexOnPageView.value = index;
-                  print(index);
-                },
-                children: Provider.of<WidgetNotifier>(context).getImageWidgets.toList(),
+              child: CustomPaint(
+                painter: MyPageIndicator(context, activeColor: Colors.blueAccent.withOpacity(0.8), unActiveColor: Colors.black.withOpacity(0.3)),
+                child: PageView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  onPageChanged: (index){
+                    Provider.of<PageIndicatorProvider>(context).setSelectedIndex(index);
+                    print(index);
+                  },
+                  children: Provider.of<WidgetNotifier>(context).getImageWidgets.toList(),
+                ),
               ),
             ),
           ],
@@ -473,6 +471,69 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
+}
+
+class MyPageIndicator extends CustomPainter{
+
+  Paint _paint;
+  double _x = 0;
+  double _radius = 3;
+  int _itemsLength;
+  BuildContext _context;
+  Color activeColor;
+  Color unActiveColor;
+  final int _space = 16;
+  MyPageIndicator(BuildContext context, {this.activeColor, this.unActiveColor}){
+    _context = context;
+    _itemsLength = Provider.of<WidgetNotifier>(context).getImageWidgets.length;
+    _paint = new Paint();
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // TODO: implement paint
+    final selectedIndex = Provider.of<PageIndicatorProvider>(_context).selectedIndex;
+    if(_itemsLength == 1) return;
+    for(int i = 0;i < _itemsLength; i++){
+      if(i == selectedIndex){
+        _paint.color = activeColor;
+        _radius = 5;
+        //canvas.drawCircle(Offset(_x + (size.width / 2) - (_itemsLength * 2) - _space, size.height / 1.1), _radius, _paint);
+        final rect = Rect.fromCenter(center: Offset(_x + (size.width / 2) - (_itemsLength * (_itemsLength / 2)) - _space, size.height / 1.1), width: (8 * 2.0), height: 8);
+        canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(8)), _paint);
+      }
+      else if(i != selectedIndex){
+        _paint.color = unActiveColor;
+        _radius = 3;
+        //canvas.drawCircle(Offset(_x + (size.width / 2) - (_itemsLength * 2) - _space, size.height / 1.1), _radius, _paint);
+        final rect = Rect.fromCenter(center: Offset(_x + (size.width / 2) - (_itemsLength * (_itemsLength / 2)) - _space, size.height / 1.1), width: 8, height: 8);
+        canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(8)), _paint);
+      }
+      _x += _space;
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    // TODO: implement shouldRepaint
+    return true;
+  }
+}
+
+class BlurPainter extends CustomPainter{
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // TODO: implement paint
+    canvas.drawRect(Rect.fromCenter(center: Offset(300, 300)), new Paint()..maskFilter = MaskFilter.blur(BlurStyle.normal, 10)..color = Colors.red);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    // TODO: implement shouldRepaint
+    return false;
+  }
+
 }
 
 //class Utility{
