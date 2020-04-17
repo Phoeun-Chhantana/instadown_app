@@ -476,8 +476,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 class MyPageIndicator extends CustomPainter{
 
   Paint _paint;
-  double _x = 0;
-  double _radius = 3;
   int _itemsLength;
   BuildContext _context;
   Color activeColor;
@@ -493,24 +491,24 @@ class MyPageIndicator extends CustomPainter{
   void paint(Canvas canvas, Size size) {
     // TODO: implement paint
     final selectedIndex = Provider.of<PageIndicatorProvider>(_context).selectedIndex;
+    double x = 16.0;
     if(_itemsLength == 1) return;
     for(int i = 0;i < _itemsLength; i++){
       if(i == selectedIndex){
         _paint.color = activeColor;
-        _radius = 5;
         //canvas.drawCircle(Offset(_x + (size.width / 2) - (_itemsLength * 2) - _space, size.height / 1.1), _radius, _paint);
-        final rect = Rect.fromCenter(center: Offset(_x + (size.width / 2) - (_itemsLength * (_itemsLength / 2)) - _space, size.height / 1.1), width: (8 * 2.0), height: 8);
+        final rect = Rect.fromCenter(center: Offset(((size.width / 2) + x) - (_itemsLength * (_itemsLength / 1.2)) - _space, size.height / 1.1), width: (8 * 2.0), height: 8);
         canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(8)), _paint);
       }
       else if(i != selectedIndex){
         _paint.color = unActiveColor;
-        _radius = 3;
         //canvas.drawCircle(Offset(_x + (size.width / 2) - (_itemsLength * 2) - _space, size.height / 1.1), _radius, _paint);
-        final rect = Rect.fromCenter(center: Offset(_x + (size.width / 2) - (_itemsLength * (_itemsLength / 2)) - _space, size.height / 1.1), width: 8, height: 8);
+        final rect = Rect.fromCenter(center: Offset(((size.width / 2) + x) - (_itemsLength * (_itemsLength / 1.2)) - _space, size.height / 1.1), width: 8, height: 8);
         canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(8)), _paint);
       }
-      _x += _space;
+      x += _space;
     }
+    print('painted ${(size.width / 2)}');
   }
 
   @override
