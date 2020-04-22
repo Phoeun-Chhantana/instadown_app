@@ -441,8 +441,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         elevation: 0.0,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(image: const AssetImage('assets/sample2_animted.gif'), fit: BoxFit.fill, repeat: ImageRepeat.noRepeat)
+        decoration: const BoxDecoration(
+          image: const DecorationImage(image: const AssetImage('assets/sample2_animted.gif'), fit: BoxFit.fill, repeat: ImageRepeat.noRepeat)
         ),
         child: Flex(
           direction: Axis.vertical,
