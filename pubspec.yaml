@@ -27,7 +27,7 @@ dependencies:
   provider: ^3.0.0
   image_gallery_saver: ^1.2.2
   permission_handler: ^5.0.0+hotfix.3
-  simple_permissions: ^0.1.9
+  #simple_permissions: ^0.1.9
 
 dev_dependencies:
   flutter_test:

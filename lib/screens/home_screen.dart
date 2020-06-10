@@ -11,7 +11,7 @@ import 'package:instadown_app/bloc/button_progress_bloc.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'package:simple_permissions/simple_permissions.dart';
+//import 'package:simple_permissions/simple_permissions.dart';
 
 class HomeScreen extends StatefulWidget{
   _HomeScreenState createState() => _HomeScreenState();
@@ -199,17 +199,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 //    );
 //  }
 
-  Future<PermissionStatus> _requestPermission() async{
-    if(Platform.isIOS){
-      final result = await SimplePermissions.requestPermission(Permission.PhotoLibrary);
-      return result;
-    }
-    else if(Platform.isAndroid){
-      final result = await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
-      return result;
-    }
-    else return null;
-  }
+//  Future<PermissionStatus> _requestPermission() async{
+//    if(Platform.isIOS){
+//      final result = await SimplePermissions.requestPermission(Permission.PhotoLibrary);
+//      return result;
+//    }
+//    else if(Platform.isAndroid){
+//      final result = await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
+//      return result;
+//    }
+//    else return null;
+//  }
 
 //  _saveToLocalDevice(Uint8List imageBytes) async{
 //    await ImageGallerySaver.saveImage(imageBytes);
@@ -399,33 +399,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   _onOutlinePressed(WidgetType type) async{
-    final result = await _requestPermission();
-    final selectedIndex = Provider.of<PageIndicatorProvider>(context).selectedIndex;
-    if(Platform.isAndroid){
-      //if(result[PermissionGroup.storage] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
-      if(result == PermissionStatus.authorized){
-        if(WidgetType.TYPE_MULTI == type){
-          final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
-          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
-              .completer.addListener(ImageStreamListener(_onImageSaver));
-        }
-        else _image.image.resolve(ImageConfiguration.empty)
-            .completer.addListener(ImageStreamListener(_onImageSaver));
-      }
-    }
-    else if(Platform.isIOS){
-      //if(result[PermissionGroup.photos] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
-      if(result == PermissionStatus.authorized){
-        if(WidgetType.TYPE_MULTI == type){
-          final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
-          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
-              .completer.addListener(ImageStreamListener(_onImageSaver));
-        }
-        else _image.image.resolve(ImageConfiguration.empty)
-            .completer.addListener(ImageStreamListener(_onImageSaver));
-      }
-      //_image.image.resolve(ImageConfiguration.empty).removeListener(ImageStreamListener(_onImage));
-    }
+//    final result = await _requestPermission();
+//    final selectedIndex = Provider.of<PageIndicatorProvider>(context).selectedIndex;
+//    if(Platform.isAndroid){
+//      //if(result[PermissionGroup.storage] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
+//      if(result == PermissionStatus.authorized){
+//        if(WidgetType.TYPE_MULTI == type){
+//          final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
+//          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
+//              .completer.addListener(ImageStreamListener(_onImageSaver));
+//        }
+//        else _image.image.resolve(ImageConfiguration.empty)
+//            .completer.addListener(ImageStreamListener(_onImageSaver));
+//      }
+//    }
+//    else if(Platform.isIOS){
+//      //if(result[PermissionGroup.photos] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
+//      if(result == PermissionStatus.authorized){
+//        if(WidgetType.TYPE_MULTI == type){
+//          final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
+//          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
+//              .completer.addListener(ImageStreamListener(_onImageSaver));
+//        }
+//        else _image.image.resolve(ImageConfiguration.empty)
+//            .completer.addListener(ImageStreamListener(_onImageSaver));
+//      }
+//      //_image.image.resolve(ImageConfiguration.empty).removeListener(ImageStreamListener(_onImage));
+//    }
   }
 
   @override
