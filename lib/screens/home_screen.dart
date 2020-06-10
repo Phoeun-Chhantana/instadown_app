@@ -9,7 +9,6 @@ import 'package:instadown_app/provider/page_indicator_provider.dart';
 import 'package:instadown_app/common_widget/button_progress.dart';
 import 'package:instadown_app/bloc/button_progress_bloc.dart';
 import 'dart:io';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:simple_permissions/simple_permissions.dart';
@@ -70,9 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         children: <Widget>[
           const SizedBox(height: 20),
           Container(
-            constraints: BoxConstraints(
-              maxWidth: 345,
-              maxHeight: 50,
+            constraints: BoxConstraints(maxWidth: 345, maxHeight: 50,
             ),
             child: CupertinoTextField(
               controller: _editingController,
@@ -373,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             future: info.image.toByteData(format: ImageByteFormat.png),
             builder: (context, snapshot){
               if(snapshot.hasData) {
-                ImageGallerySaver.saveImage(snapshot.data.buffer.asUint8List(snapshot.data.offsetInBytes, snapshot.data.lengthInBytes));
+                //ImageGallerySaver.saveImage(snapshot.data.buffer.asUint8List(snapshot.data.offsetInBytes, snapshot.data.lengthInBytes));
                 Navigator.of(context).pop(); // automatically finish dialog when saved
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
