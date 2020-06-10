@@ -12,6 +12,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 //import 'package:simple_permissions/simple_permissions.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 class HomeScreen extends StatefulWidget{
   _HomeScreenState createState() => _HomeScreenState();
@@ -199,17 +201,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 //    );
 //  }
 
-//  Future<PermissionStatus> _requestPermission() async{
-//    if(Platform.isIOS){
-//      final result = await SimplePermissions.requestPermission(Permission.PhotoLibrary);
-//      return result;
-//    }
-//    else if(Platform.isAndroid){
-//      final result = await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
-//      return result;
-//    }
-//    else return null;
-//  }
+  Future<PermissionStatus> _requestPermission() async{
+    if(Platform.isIOS){
+      //final result = await SimplePermissions.requestPermission(Permission.PhotoLibrary);
+      final result = await Permission.photos.request();
+      return result;
+    }
+    else if(Platform.isAndroid){
+      //final result = await SimplePermissions.requestPermission(Permission.WriteExternalStorage);
+      final result = await Permission.storage.request();
+      return result;
+    }
+    else return null;
+  }
 
 //  _saveToLocalDevice(Uint8List imageBytes) async{
 //    await ImageGallerySaver.saveImage(imageBytes);
@@ -370,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             future: info.image.toByteData(format: ImageByteFormat.png),
             builder: (context, snapshot){
               if(snapshot.hasData) {
-                //ImageGallerySaver.saveImage(snapshot.data.buffer.asUint8List(snapshot.data.offsetInBytes, snapshot.data.lengthInBytes));
+                ImageGallerySaver.saveImage(snapshot.data.buffer.asUint8List(snapshot.data.offsetInBytes, snapshot.data.lengthInBytes));
                 Navigator.of(context).pop(); // automatically finish dialog when saved
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -399,33 +403,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   _onOutlinePressed(WidgetType type) async{
-//    final result = await _requestPermission();
-//    final selectedIndex = Provider.of<PageIndicatorProvider>(context).selectedIndex;
-//    if(Platform.isAndroid){
-//      //if(result[PermissionGroup.storage] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
-//      if(result == PermissionStatus.authorized){
-//        if(WidgetType.TYPE_MULTI == type){
-//          final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
-//          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
-//              .completer.addListener(ImageStreamListener(_onImageSaver));
-//        }
-//        else _image.image.resolve(ImageConfiguration.empty)
-//            .completer.addListener(ImageStreamListener(_onImageSaver));
-//      }
-//    }
-//    else if(Platform.isIOS){
-//      //if(result[PermissionGroup.photos] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
-//      if(result == PermissionStatus.authorized){
-//        if(WidgetType.TYPE_MULTI == type){
-//          final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
-//          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
-//              .completer.addListener(ImageStreamListener(_onImageSaver));
-//        }
-//        else _image.image.resolve(ImageConfiguration.empty)
-//            .completer.addListener(ImageStreamListener(_onImageSaver));
-//      }
-//      //_image.image.resolve(ImageConfiguration.empty).removeListener(ImageStreamListener(_onImage));
-//    }
+    final result = await _requestPermission();
+    final selectedIndex = Provider.of<PageIndicatorProvider>(context).selectedIndex;
+    if(Platform.isAndroid){
+      //if(result[PermissionGroup.storage] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
+      if(result == PermissionStatus.granted){
+        if(WidgetType.TYPE_MULTI == type){
+          final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
+          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
+              .completer.addListener(ImageStreamListener(_onImageSaver));
+        }
+        else _image.image.resolve(ImageConfiguration.empty)
+            .completer.addListener(ImageStreamListener(_onImageSaver));
+      }
+    }
+    else if(Platform.isIOS){
+      //if(result[PermissionGroup.photos] == PermissionStatus.granted) _buildDialog(url: '$url', userId: '$userId');
+      if(result == PermissionStatus.granted){
+        if(WidgetType.TYPE_MULTI == type){
+          final imageWidgets = Provider.of<WidgetNotifier>(context).getImageWidgets;
+          (imageWidgets.elementAt(selectedIndex) as Image).image.resolve(ImageConfiguration.empty)
+              .completer.addListener(ImageStreamListener(_onImageSaver));
+        }
+        else _image.image.resolve(ImageConfiguration.empty)
+            .completer.addListener(ImageStreamListener(_onImageSaver));
+      }
+      //_image.image.resolve(ImageConfiguration.empty).removeListener(ImageStreamListener(_onImage));
+    }
   }
 
   @override
