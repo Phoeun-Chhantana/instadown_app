@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:instadown_app/model/insta_model.dart';
@@ -109,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               builder: (context, snapshot){
                 return RaisedButtonProgress(
                   onPressed: _progressBloc.isProcessing ? _onPressed : null,
-                  child: snapshot.hasData ? Text('${snapshot.data}') : const Text('Get'),
+                  child: snapshot.hasData ? Text('${snapshot.data}' == 'Getting' ? '${snapshot.data}...' : '${snapshot.data}') : const Text('Get'),
                 );
               },
             )
