@@ -455,17 +455,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
             Expanded(
               flex: 3,
-              child: CustomPaint(
-                painter: MyPageIndicator(context, activeColor: Colors.blueAccent.withOpacity(0.8), unActiveColor: Colors.black.withOpacity(0.3)),
-                child: PageView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  onPageChanged: (index){
-                    Provider.of<PageIndicatorProvider>(context).setSelectedIndex(index);
-                    print(index);
-                  },
-                  children: Provider.of<WidgetNotifier>(context).getImageWidgets.toList(),
-                ),
+//              child: CustomPaint(
+//                painter: MyPageIndicator(context, activeColor: Colors.blueAccent.withOpacity(0.8), unActiveColor: Colors.black.withOpacity(0.3)),
+//                child: PageView(
+//                  scrollDirection: Axis.horizontal,
+//                  physics: const BouncingScrollPhysics(),
+//                  onPageChanged: (index){
+//                    Provider.of<PageIndicatorProvider>(context).setSelectedIndex(index);
+//                    print(index);
+//                  },
+//                  children: Provider.of<WidgetNotifier>(context).getImageWidgets.toList(),
+//                ),
+//              ),
+              child: PageView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                onPageChanged: (index){
+                  Provider.of<PageIndicatorProvider>(context).setSelectedIndex(index);
+                  print(index);
+                },
+                children: Provider.of<WidgetNotifier>(context).getImageWidgets.toList(),
               ),
             ),
           ],
